@@ -16,15 +16,15 @@ print( "ver2 " +get_version())
 
 from pathlib import Path
 this_directory = Path(__file__).parent
-long_description = (this_directory / "README.md").read_text()
-
+long_description_md = (this_directory / "README.md").read_text()
+print(f"{long_description_md}")
 setup(
     version         =  get_version(),
     name             = 'openapi-spec-sanitizer',
     author           = 'David Turland',
     author_email     = 'david@turland.org',
     description      = 'Sanitizes unused definitions',
-    long_description = long_description,
+    long_description = long_description_md,
     long_description_content_type = 'text/markdown',
     url              = 'https://github.com/DavidTurland/openapi-spec-sanitizer',
     license          = 'Apache',
@@ -38,7 +38,7 @@ setup(
     package_dir     = {'': 'src'},
     packages        = ['openapi_spec_sanitizer'],
     entry_points    = { 'console_scripts': [
-                          "openapi_spec_sanitizer = src.openapi_spec_sanitizer.__main__:main" 
+                          "openapi_spec_sanitizer = openapi_spec_sanitizer.__main__:main" 
                           ] },
     keywords        ='toposort graph tolerant',
     project_urls    = {   'Issue Tracker': 'https://github.com/DavidTurland/openapi-spec-sanitizer/issues',
