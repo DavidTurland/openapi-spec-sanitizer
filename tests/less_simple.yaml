@@ -1,0 +1,78 @@
+openapi: 3.0.0
+paths:
+  '/wibble':
+    post:
+      summary: wobble
+      requestBody:
+        $ref: '#/components/requestBodies/requestBodyARequired'
+      responses:
+        '201':
+          $ref: '#/components/responses/responseARequired'
+        '400':
+          $ref: '#/components/responses/responseBRequired'
+        '401':
+          $ref: '#/components/responses/responseCRequired'
+        '402':
+          $ref: '#/components/responses/undefinedA'
+components:
+  parameters:
+    unusedParameter:
+      name: unusedParameter
+      description: An unused parameter
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/schemaPlain'
+  requestBodies:
+    requestBodyARequired:
+      description: used by /wibble/post/requestBody
+      required: true
+      content:
+        application/vnd.openbanking.directory.authorisationserver-v2+json:
+          schema:
+            $ref: '#/components/schemas/schemaAB'
+  responses:
+    responseARequired:
+      description: Used by /wibble/responses/201
+      headers:
+        OB-Request-Id:
+          schema:
+            $ref: '#/components/schemas/schemaPlain'
+    responseBRequired:
+      description:  Used by /wibble/responses/400
+      headers:
+        OB-Request-Id:
+          schema:
+            $ref: '#/components/schemas/schemaPlain'
+    responseCRequired:
+      description: Used by /wibble/responses/401
+      headers:
+        OB-Request-Id:
+          schema:
+            $ref: '#/components/schemas/schemaC'
+  schemas:
+    schemaA:
+      type: array
+      description:  Unused
+      items:
+        $ref: '#/components/schemas/schemaAB'
+    schemaAB:
+      type: array
+      description:  used by the requestBodyARequired and the unused /schemas/schemaA
+      items:
+        $ref: '#/components/schemas/schemaAC'
+    schemaAC:
+      type: array
+      description:  used but by the unused /schemas/schemaA
+      items:
+        $ref: '#/components/schemas/schemaC'
+    schemaC:
+      type: array
+      description:  Used by /reponses/responseC
+      items:
+        $ref: '#/components/schemas/schemaPlain'
+    schemaPlain:
+      type: array
+      description:  Used by various
+      items:
+        type: string

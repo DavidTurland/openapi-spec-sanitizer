@@ -1,0 +1,46 @@
+openapi: 3.0.0
+paths:
+  /wibble:
+    post:
+      summary: wobble
+      requestBody:
+        $ref: '#/components/requestBodies/requestBodyMissingRequired'
+        __line__: 7
+      responses:
+        '201':
+          $ref: '#/components/responses/responseA'
+          __line__: 10
+        __line__: 9
+      __line__: 5
+    __line__: 4
+  __line__: 3
+components:
+  parameters: null
+  requestBodies:
+    requestBodyAUnused:
+      description: requestBodyAUnused description
+      required: true
+      content:
+        application/vnd.openbanking.directory.authorisationserver-v2+json:
+          schema:
+            $ref: '#/components/schemas/schemaAbMissingUnused'
+            __line__: 20
+          __line__: 19
+        __line__: 18
+      __line__: 15
+    __line__: 14
+  responses:
+    responseA:
+      description: responseA
+      headers:
+        OB-Request-Id:
+          schema:
+            $ref: '#/components/schemas/schemaPlainMissingUnused'
+            __line__: 27
+          __line__: 26
+        __line__: 25
+      __line__: 23
+    __line__: 22
+  schemas: null
+  __line__: 12
+__line__: 1
