@@ -79,6 +79,51 @@ components:
             with self.assertRaises(yaml.parser.ParserError):
                 sanitizer.sanitize(bogus_yaml)
 
+    def test_openapi_versions(self):
+
+        versions = [
+             ('openapi','3.0.0',   True,None),
+             ('openapi','.3.0.0',  False, InvalidYamlException),
+             ('openapi','wibble',  False, InvalidYamlException),
+             ('openapi','4.0.0',   False, InvalidYamlException),
+             ('swagger','2.0',     False, InvalidYamlException),
+             ('swagger','1.9',     False, InvalidYamlException),
+             ('swagger','3.0',     False, InvalidYamlException),
+             ('swagger','wibble',  False, InvalidYamlException),
+             ('flooby' ,'dooby',   False, InvalidYamlException)
+           ]
+
+        for brand,version,ok,exception in versions:
+            test_yaml = """
+{brand}: {version}
+paths:
+  /wibble:
+    post:
+      summary: wobble
+      requestBody:
+        $ref: '#/components/requestBodies/requestBody'
+components:
+  parameters:
+  requestBodies:
+    requestBody:
+      description: requestBodyAUnused description
+      required: true
+      content:
+        application/json:
+          schema:
+            type: string
+  responses:
+  schemas:
+""".format(version = version, brand = brand)
+            parser = ArgParser()
+            args = parser.parse_args([test_yaml])
+            sanitizer = Sanitizer(args)
+            if ok:
+                sanitizer.sanitize(test_yaml)
+            else:
+                with self.assertRaises(exception, msg = "THis doesnty work"):
+                    sanitizer.sanitize(test_yaml)
+
     def test_simple(self):
         test_yaml = """
 openapi: 3.0.0

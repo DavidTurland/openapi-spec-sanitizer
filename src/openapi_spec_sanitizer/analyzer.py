@@ -79,9 +79,17 @@ class Analyzer(Stateful):
     def _swagger_ver(self):
         self.needs(State.LOADED,"_swagger_ver")
         if 'swagger' in self.document:
-            self._version = float(self.document['swagger'])
+            if 2.0 == self.document['swagger']:
+                self._version = 2
+            else:
+                raise InvalidYamlException(f"swagger version failed: must be '2.0', but is {self.document['swagger']}")
         elif 'openapi' in self.document:
-            self._version = float( parse_version(self.document['openapi']).major)
+            try:
+                self._version = int( parse_version(self.document['openapi']).major)
+                if(self._version != 3):
+                    raise InvalidYamlException(f"openapi version failed, must be 3, but is {self._version}") 
+            except  AttributeError as exc:
+                raise InvalidYamlException(f"version failed whilst parsing '{self.document['openapi']}'") from exc 
         else:
             raise InvalidYamlException("swagger or openapi key not found")
 
