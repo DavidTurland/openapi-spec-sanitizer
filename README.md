@@ -1,16 +1,17 @@
 # openapi_spec_sanitizer
 
+A Sanitizer for [OpenAPI](https://www.openapis.org/) Yaml spec files
 
 ## Description
 
-Offers a CLI, or simple API, to detect, report, and, optionally, fix unused components in OpenApi specifications
+Offers a CLI, or simple API, to detect, report, and, optionally, fix unused components in OpenAPI specifications
 
-* Detects unused, or undefined, components in Swagger (2.0) and Openapi (3.*) (soz: yaml-only) specifications
+* Detects unused, or undefined, components in Swagger (2.0) and OpenAPI (3.*) (soz: yaml-only) specifications
 * It can _sanitize_ discovered unused components, either by:
     - deleting the component
     - or adding a new tag to the component
 * Sanitised yaml is stored to file
-* Openapi/Swagger Spec files can be loaded from URI or file
+* OpenAPI/Swagger Spec files can be loaded from URI or file
 * It always tries not to overwrite existing files(yay!)
 * It detects (unsupported so far) remote references and politely gives up
 
@@ -59,7 +60,7 @@ options:
   --version             show the version number and exit
 
 Yaml Loading Options:
-  filename              openapi specification: file path or url (yaml-only)
+  filename              OpenAPI specification: file path or url (yaml-only)
 
 Sanitizing Options:
   -s, --sanitize        Attempt to sanitize spec file (default False)
@@ -87,7 +88,7 @@ Uunused components
 
 ### Sanitizing Unused components
 
-Here we have an Openapi spec with an unused component,`/components/requestBodies/requestBodyAUnused`
+Here we have an OpenAPI spec with an unused component,`/components/requestBodies/requestBodyAUnused`
 ```yaml
 openapi: 3.0.0
 paths:
@@ -180,11 +181,11 @@ python3 setup.py test
 ```
 
 ### OpenBanking Specification Tests
-Tests some of the OpenApi spec files from the [OpenBanking](https://github.com/OpenBankingUK) Official Open Banking UK API Standards  
+Tests some of the OpenAPI spec files from the [OpenBanking](https://github.com/OpenBankingUK) Official Open Banking UK API Standards  
 
 And yes (as of 14/2/23) there are unused components...  
 **NOTE:**
-- These tests are not run as part of setuptools 
+- These tests are not run as part of python setuptools 
 - Remote spec files are cached once and used locally
 ```bash
 python3 setup.py test -s tests.openbanking
