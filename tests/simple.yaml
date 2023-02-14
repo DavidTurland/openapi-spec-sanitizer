@@ -1,0 +1,28 @@
+openapi: 3.0.0
+paths:
+  /wibble:
+    post:
+      summary: wobble
+      requestBody:
+        $ref: '#/components/requestBodies/requestBodyMissingRequired'
+      responses:
+        '201':
+          $ref: '#/components/responses/responseA'
+components:
+  parameters:
+  requestBodies:
+    requestBodyAUnused:
+      description: requestBodyAUnused description
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/schemaAbMissingUnused'
+  responses:
+    responseA:
+      description: responseA
+      headers:
+        Floob:
+          schema:
+            $ref: '#/components/schemas/schemaPlainMissingUnused'
+  schemas:

@@ -1,0 +1,29 @@
+openapi: 3.0.0
+paths:
+  /wibble:
+    post:
+      summary: wobble
+      requestBody:
+        application/json:
+          schema:
+            type: "string"
+      responses:
+        '201':
+          $ref: '#/components/responses/responseA'
+components:
+  parameters:
+  requestBodies:
+    requestBodyAUnused:
+      description: requestBodyAUnused description
+      required: true
+      content:
+        application/json:
+          schema:
+            type: "string"
+  responses:
+    responseA:
+      description: responseA
+      headers:
+        Floob:
+          schema:
+            type: "string"

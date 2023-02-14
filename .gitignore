@@ -1,5 +1,8 @@
+/**/.vscode/
+tests/openbanking/.cache/
 .eggs/
 build/
 dist/
+*.san.yaml
 *.egg-info/
 __pycache__/

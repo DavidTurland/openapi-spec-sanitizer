@@ -1,0 +1,49 @@
+-   filename: account-info-openapi.yaml
+    url: https://raw.githubusercontent.com/OpenBankingUK/read-write-api-specs/master/dist/openapi/
+    unused_components:
+    - /components/parameters/x-idempotency-key
+    - /components/parameters/x-jws-signature
+    - /components/schemas/OBAccount6Basic
+    - /components/schemas/OBAccount6Detail
+    - /components/schemas/OBBeneficiary5Basic
+    - /components/schemas/OBBeneficiary5Detail
+    - /components/schemas/OBScheduledPayment3Basic
+    - /components/schemas/OBScheduledPayment3Detail
+    - /components/schemas/OBStandingOrder6Basic
+    - /components/schemas/OBStandingOrder6Detail
+    - /components/schemas/OBStatement2Basic
+    - /components/schemas/OBStatement2Detail
+    - /components/schemas/OBTransaction6Basic
+    - /components/schemas/OBTransaction6Detail
+    - /components/schemas/Model
+-   filename: confirmation-funds-openapi.yaml
+    url: https://raw.githubusercontent.com/OpenBankingUK/read-write-api-specs/master/dist/openapi/
+    unused_components:
+    - /components/responses/404Error
+    - /components/parameters/x-jws-signature
+    - /components/parameters/x-idempotency-key
+-   filename: event-notifications-openapi.yaml
+    url: https://raw.githubusercontent.com/OpenBankingUK/read-write-api-specs/master/dist/openapi/
+    unused_components:
+    - /components/schemas/OBEvent1
+    - /components/schemas/OBEventLink1
+    - /components/schemas/OBEventSubject1
+    - /components/schemas/OBEventNotification1
+    - /components/schemas/OBEventResourceUpdate1
+-   filename: events-openapi.yaml
+    url: https://raw.githubusercontent.com/OpenBankingUK/read-write-api-specs/master/dist/openapi/
+    unused_components:
+    - /components/parameters/x-idempotency-key
+-   filename: payment-initiation-openapi.yaml
+    url: https://raw.githubusercontent.com/OpenBankingUK/read-write-api-specs/master/dist/openapi/
+    unused_components:
+    - /components/schemas/OBCashAccountCreditor3
+-   filename: vrp-openapi.yaml
+    url: https://raw.githubusercontent.com/OpenBankingUK/read-write-api-specs/master/dist/openapi/
+    unused_components:
+    - /components/schemas/OBExternalAccountType1Code
+    - /components/schemas/OBExternalStatus2Code
+    - /components/responses/404Error
+    - /components/schemas/OBExternalFinancialInstitutionIdentification4Code
+    - /components/schemas/OBBranchAndFinancialInstitutionIdentification6
+    - /components/schemas/OBCharge2

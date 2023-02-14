@@ -1,124 +1,134 @@
-import yaml
-import collections
+#######################################################################
+# openapi-spec-sanitizer
+# Copyright David Turland 2023
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+########################################################################
+__all__ = ['Sanitizer']
+
+import sys
 from enum import Enum
-from packaging.version import parse as parse_version
+from pathlib import Path
+import logging
+import os
+import oyaml as yaml
 
-# Thanks https://stackoverflow.com/questions/13319067/parsing-yaml-return-with-line-number
-class SafeLineLoader(yaml.loader.SafeLoader):
-    def construct_mapping(self, node, deep=False):
-        mapping = super(SafeLineLoader, self).construct_mapping(node, deep=deep)
-        mapping['__line__'] = node.start_mark.line + 1
-        return mapping
+from .loader import Loader
+from .stateful import Stateful
+from .analyzer import Analyzer,State
+from .exceptions import *
 
-class State(Enum):
-    UNKNOWN = 1
-    LOADED  = 2
-    PARSED  = 3
+logger = logging.getLogger('openapi_spec_sanitizer')
 
-class Sanitizer:
-    def __init__(self, referrals ={},definitions={},rewrite=False):
-        self.referrals = collections.defaultdict(set)
-        self.definitions = definitions
-        self.unused_definitions = {}
-        self.bank_yaml = {}
-        self._version  = None
-        self.debug     = False
-        self._state   = State.UNKNOWN
+class Sanitizer(Stateful):
 
-    def needs(self,state,msg):
-        if(state.value < self._state.value):
-            print(f"invalid state {msg}")
+    class SanitizeMode(Enum):
+        DELETE    = 1
+        TAG       = 2
+        NONE      = 3
 
-    def load_str(self,yaml_str):
-        self.bank_yaml = yaml.load(yaml_str, Loader=SafeLineLoader)
-        self._state = State.LOADED
-        self._swagger_ver()
+    def __init__(self,args):
+        super().__init__(State.UNKNOWN)
+        self.sanitizing      = args.sanitize
+        self.output_filename = args.output
+        self._debug          = args.debug
+        self.warnings_are_ok = args.warnings_are_ok
+        self.sanitize_mode   = self.SanitizeMode.NONE
+        self.orig_yaml       = {}
+        if self.sanitizing:
+            if(args.tag is not None ):
+                self.sanitize_mode = self.SanitizeMode.TAG
+                self.sanitize_tag  = args.tag
+            elif (args.delete):
+                self.sanitize_mode = self.SanitizeMode.DELETE
+        self.loader        = Loader(args)
+        self.analyzer      = Analyzer(args)
 
-    def load(self,path_in_str):
-        with open(path_in_str, 'r',encoding='utf-8') as file:
-            self.bank_yaml = yaml.load(file, Loader=SafeLineLoader)
-            self._state   = State.LOADED
-            self._swagger_ver()
+    def report(self):
+        return self.analyzer.report()
 
-    def walk(self):
-        self.needs(State.LOADED,"failed to load or load_str")
-        self._walk_spec(self.bank_yaml,())
-        self._state = State.PARSED
+    def dump(self,path):
+        self.at_least(State.LOADED,"dump")
+        filename        = self.output_filename
+        loader_filename = self.loader.get_filename()
+        if filename is None:
+            if loader_filename is None: 
+                raise InvalidFileException()
+            root, ext = os.path.splitext(loader_filename)
+            filename = f"{root}.san{ext}"
+        elif loader_filename is not None:
+            if(loader_filename == filename):
+                raise InvalidFileException(f"will not overwrite original file {filename}")
+        if Path(filename).exists():
+            raise InvalidFileException(f"will not overwrite existing file {filename}")
+        logger.info(f"Main: dumping sanitized yaml to {filename}")
+        with open(filename, 'w',encoding='utf-8') as file:
+            yaml.dump(self.orig_yaml, file,width=1000)
 
-    def _is_definition(self,path):
-        self.needs(State.LOADED,"failed to load or load_str")
-        if(   3.0 == self._version and
-              3 == len(path) and
-              'components' == path[0] and
-              path[1] in ('parameters','requestBodies','responses','schemas','securitySchemas')):
-            return True
-        elif( 3.0 == self._version and
-              2 == len(path) and
-              path[0] in ('parameters','responses','definitions','securityDefinitions')):
-            return True
-        return False
+    def sanitize(self,file):
+        self.orig_yaml = self.loader.load(file)
+        try:
+            self.analyzer.analyze(self.orig_yaml)
+        except Warning as e:
 
-    def _walk_spec(self, dictionary, path):
-        if type(dictionary) == list:
-            for i, element in enumerate(dictionary):
-                self._walk_spec( element, path+(i,) )
-        elif type(dictionary) == dict:
-            jp = ''.join(['/' + str(ele)  for ele in path])
-            line_no = dictionary.get('__line__',None)
-            if(self._is_definition(path)):
-                self.definitions[jp] = {'__line__' : line_no}
-            for key, value in dictionary.items():
-                if('$ref' == key):
-                    # remove '#' from start
-                    def_path = dictionary[key][1:]
-                    self.referrals[def_path].add((jp,line_no))
-                elif '__line__' != key:
-                    self._walk_spec( dictionary[key], path+(key,))
+            if self.warnings_are_ok:
+                logger.warning(f"Sanitizer: Tolerable issue when analyzing yaml: {e}")
+            else:
+                logger.warning(f"Sanitizer: Urecoverable issue when analyzing yaml: {e}")
+                raise e
+        except Unrecoverable as e:
+            logger.error(f"Sanitizer: Urecoverable issue when analyzing yaml: {e}")
+            raise e
+        if self.sanitizing:
+            logger.info(f"Sanitizing")
+            root_path = ()
+            self._sanitize(self.orig_yaml,root_path)
+        self._state = State.SANITIZED
 
-    def undefined_defs(self):
-        self.needs(State.PARSED,"failed to load or load_str")
-        for def_path, referrers in self.referrals.items():
-            if def_path not in self.definitions:
-                print(f"  Did not find definition for {def_path} referred ")
+    def _sanitize(self, node, path):
+        if type(node) == list:
+            unused_nodes = []
+            for i, element in enumerate(node):
+                dest_path     = path+(i,)
+                dest_path_str = ''.join(['/' + str(n)  for n in dest_path])
+                unused_node   =  dest_path_str in self.analyzer.unused_components
+                if unused_node:
+                    print(f"Marking node {dest_path} as unused")
+                    unused_nodes.append(i)
+                self._sanitize( element, dest_path )
+            for i in sorted(unused_nodes,reverse = True):
+                self._sanitize_node(node[i])
+            # remove bogus __line__
+            node = [kv for kv in node if '__line__' not in kv]
+        elif type(node) == dict:
+            unused_nodes = set()
+            for key, value in node.items():
+                dest_path     = path+(key,)
+                dest_path_str = ''.join(['/' + str(n)  for n in dest_path])
+                unused_node   =  dest_path_str in self.analyzer.unused_components
+                if unused_node:
+                    unused_nodes.add(key)
+                    print(f"Marking node {dest_path} as unused")
+                self._sanitize( node[key], dest_path)
+            for key in unused_nodes:
+                self._sanitize_node(node[key])
+            # remove bogus __line__                
+            node.pop('__line__', None)
 
-    def unused_defs(self):
-        self.needs(State.PARSED,"failed to load or load_str")
-        changed = True
-        iteration = 1;
-        while changed:
-            print (f"Iteration {iteration} " + ">" * 20 )
-            changed = False
-            iteration +=1
-            for definition, definition_meta in self.definitions.items():
-                if definition not in self.referrals or not self.referrals[definition]:
-                    print(f"   Did not use definition {definition}, line number {definition_meta['__line__']}")
-                    self.unused_definitions[definition] = definition_meta
-                    print(f"add unused_definitions {definition} line {definition_meta['__line__']}")
-            for referred_definition, referrers in self.referrals.items():
-                referrers_to_be_removed = set()
-                for referrer in referrers:
-                    for definition, definition_meta in self.unused_definitions.items():
-                        if referrer[0].startswith(definition):
-                            print(f"  Referrer{referrer} not used, referencing {referred_definition}, line number {definition_meta['__line__']}")
-                            referrers_to_be_removed.add(referrer)
-                referrers -= referrers_to_be_removed
-                if not referrers:
-                    print(f"Empty referrer so will not be using {referred_definition}")
-            for referred_definition, referrers in self.referrals.items():
-                if(0 == len(referrers) and (referred_definition not in self.unused_definitions)):
-                    definition_meta = self.definitions[referred_definition]
-                    print(f"  Did not use definition {referred_definition}, line number {definition_meta['__line__']}, by deduction")
-                    self.unused_definitions[referred_definition] = definition_meta
-                    print(f"add inferred unused_definitions {referred_definition} line {definition_meta['__line__']}")
-                    changed = True
-        for definition,definition_meta in self.unused_definitions.items():
-            print(f" Not using {definition}, line number {definition_meta['__line__']}")
-        return self.unused_definitions
-
-    def _swagger_ver(self):
-        self.needs(State.LOADED,"failed to load or load_str")
-        if 'swagger' in self.bank_yaml:
-            self._version = float(self.bank_yaml['swagger'])
-        elif 'openapi' in self.bank_yaml:
-            self._version = float( parse_version(self.bank_yaml['openapi']).major)
+    def _sanitize_node(self,node):
+        """ Assumes node is a dict! """
+        if self.SanitizeMode.TAG == self.sanitize_mode:
+            node[self.sanitize_tag] = True
+        elif self.SanitizeMode.DELETE == self.sanitize_mode:
+            del node
 
