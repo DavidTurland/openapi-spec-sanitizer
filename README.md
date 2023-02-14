@@ -190,3 +190,6 @@ And yes (as of 14/2/23) there are unused components...
 ```bash
 python3 setup.py test -s tests.openbanking
 ```
+# Attributions
+[OpenAPI Initiative OpenAPI-Specification](https://github.com/OAI/OpenAPI-Specification) - A snapshot of one of their sample OpenAPI spec files,[api-with-examples.yaml](https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/examples/v3.0/api-with-examples.yaml), is stored in this repo, and 
+is used in one of the unit tests (It passes BTW :-) )
