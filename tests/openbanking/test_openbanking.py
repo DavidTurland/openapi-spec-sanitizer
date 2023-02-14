@@ -37,26 +37,29 @@ class TestOpenBanking(unittest.TestCase):
             os.makedirs(cache_dir)
         yaml_specs_file = "./tests/openbanking/openbanking_specs.yaml"
         yaml_specs = None
+        extensions = ['.yaml','.json']
         with open(yaml_specs_file, 'r',encoding='utf-8') as file:
-            yaml_specs = load(file, Loader=Loader)
-        for yaml_spec in yaml_specs:
-            filename        = yaml_spec['filename']
-            url_root        = yaml_spec['url']
-            expected_unused = set(yaml_spec['unused_components'])
+            openapi_specs = load(file, Loader=Loader)
+        for openapi_spec in openapi_specs:
+            filename        = openapi_spec['filename']
+            root, ext = os.path.splitext(filename)
+            for extension in extensions:
+                url_root        = openapi_spec['url']
+                expected_unused = set(openapi_spec['unused_components'])
 
-            cache_path = f"{cache_dir}/{filename}"
-            url_path   = f"{url_root}/{filename}"
-            if not Path(cache_path).exists():
-                urllib.request.urlretrieve(url_path,cache_path)
-            parser = ArgParser()
-            args = parser.parse_args([cache_path])
-            sanitizer = Sanitizer(args)
-            if len(expected_unused):
-                with self.assertRaises(DirtyYamlWarning):
+                cache_path = f"{cache_dir}/{root}{extension}"
+                url_path   = f"{url_root}/{root}{extension}"
+                if not Path(cache_path).exists():
+                    urllib.request.urlretrieve(url_path,cache_path)
+                parser = ArgParser()
+                args = parser.parse_args([cache_path])
+                sanitizer = Sanitizer(args)
+                if len(expected_unused):
+                    with self.assertRaises(DirtyYamlWarning):
+                        sanitizer.sanitize(cache_path)
+                    self.assertSetEqual(set(list(sanitizer.analyzer.unused_components.keys())),
+                                        expected_unused
+                                        , "unused"
+                                       )
+                else:
                     sanitizer.sanitize(cache_path)
-                self.assertSetEqual(set(list(sanitizer.analyzer.unused_components.keys())),
-                                    expected_unused
-                                    , "unused"
-                                   )
-            else:
-                sanitizer.sanitize(cache_path)
