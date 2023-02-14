@@ -27,6 +27,7 @@ from .loader import Loader
 from .stateful import Stateful
 from .analyzer import Analyzer,State
 from .exceptions import *
+from .dumper import Dumper
 
 logger = logging.getLogger('openapi_spec_sanitizer')
 
@@ -53,6 +54,7 @@ class Sanitizer(Stateful):
                 self.sanitize_mode = self.SanitizeMode.DELETE
         self.loader        = Loader(args)
         self.analyzer      = Analyzer(args)
+        self.dumper        = Dumper(self.loader,args)
 
     def report(self):
         return self.analyzer.report()
@@ -60,20 +62,9 @@ class Sanitizer(Stateful):
     def dump(self,path):
         self.at_least(State.LOADED,"dump")
         filename        = self.output_filename
+        self.dumper.dump(filename)
         loader_filename = self.loader.get_filename()
-        if filename is None:
-            if loader_filename is None: 
-                raise InvalidFileException()
-            root, ext = os.path.splitext(loader_filename)
-            filename = f"{root}.san{ext}"
-        elif loader_filename is not None:
-            if(loader_filename == filename):
-                raise InvalidFileException(f"will not overwrite original file {filename}")
-        if Path(filename).exists():
-            raise InvalidFileException(f"will not overwrite existing file {filename}")
         logger.info(f"Main: dumping sanitized yaml to {filename}")
-        with open(filename, 'w',encoding='utf-8') as file:
-            yaml.dump(self.orig_yaml, file,width=1000)
 
     def sanitize(self,file):
         self.orig_yaml = self.loader.load(file)

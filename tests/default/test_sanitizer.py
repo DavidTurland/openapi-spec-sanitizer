@@ -37,6 +37,7 @@ class TestSanitizer(unittest.TestCase):
         args = parser.parse_args([file])
         sanitizer = Sanitizer(args)
         sanitizer.sanitize(file)
+
     def test_remote_ref(self):
         test_yaml = """
 openapi: 3.0.0
@@ -60,7 +61,50 @@ components:
   schemas:
 """
         parser = ArgParser()
-        args = parser.parse_args([test_yaml])
+        args = parser.parse_args(['--yaml',test_yaml])
+        sanitizer = Sanitizer(args)
+
+        with self.assertRaises(UnsupportedYamlException):
+            sanitizer.sanitize(test_yaml)
+
+    def test_remote_ref_json(self):
+        test_yaml = """
+{
+    "openapi": "3.0.0",
+    "paths": {
+        "/wibble": {
+            "post": {
+                "summary": "wobble",
+                "requestBody": {
+                    "$ref": "../floob.yaml/components/requestBodies/requestBodyMissing"
+                },
+                "responses": {
+                    "201": {
+                        "$ref": "#/components/responses/responseA"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "responses": {
+            "responseA": {
+                "description": "Created",
+                "headers": {
+                    "responseHeader": {
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "schemas": null
+    }
+}
+"""
+        parser = ArgParser()
+        args = parser.parse_args(['--json',test_yaml])
         sanitizer = Sanitizer(args)
 
         with self.assertRaises(UnsupportedYamlException):
@@ -73,7 +117,7 @@ components:
         bogus_yamls = ["unbalanced blackets: ]["]
         parser = ArgParser()
         for bogus_yaml in bogus_yamls:
-            args = parser.parse_args([bogus_yaml])
+            args = parser.parse_args(['--yaml',bogus_yaml])
             sanitizer = Sanitizer(args)
 
             with self.assertRaises(yaml.parser.ParserError):
@@ -116,7 +160,7 @@ components:
   schemas:
 """.format(version = version, brand = brand)
             parser = ArgParser()
-            args = parser.parse_args([test_yaml])
+            args = parser.parse_args(['--yaml',test_yaml])
             sanitizer = Sanitizer(args)
             if ok:
                 sanitizer.sanitize(test_yaml)
@@ -156,7 +200,77 @@ components:
   schemas:
 """
         parser = ArgParser()
-        args = parser.parse_args([test_yaml])
+        args = parser.parse_args(['--yaml',test_yaml])
+        sanitizer = Sanitizer(args)
+
+        with self.assertRaises(InvalidYamlException):
+            sanitizer.sanitize(test_yaml)
+
+        expected_unused = {'/components/requestBodies/requestBodyAUnused'}
+        self.assertSetEqual(set(list(sanitizer.analyzer.unused_components.keys())),
+                            expected_unused
+                            , "expected_unused"
+                           )
+        expected_undefined = {'/components/requestBodies/requestBodyMissingRequired',
+                              '/components/schemas/schemaPlainMissingUnused'
+                             }
+        self.assertSetEqual(set(list(sanitizer.analyzer.get_undefined_components().keys())),
+                            expected_undefined
+                            , "expected_undefined"
+                           )
+
+    def test_simple_json(self):
+        test_yaml = """
+{
+    "openapi": "3.0.0",
+    "paths": {
+        "/wibble": {
+            "post": {
+                "summary": "wobble",
+                "requestBody": {
+                    "$ref": "#/components/requestBodies/requestBodyMissingRequired"
+                },
+                "responses": {
+                    "201": {
+                        "$ref": "#/components/responses/responseA"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "parameters": null,
+        "requestBodies": {
+            "requestBodyAUnused": {
+                "description": "requestBodyAUnused description",
+                "required": true,
+                "content": {
+                    "application/vnd.openbanking.directory.authorisationserver-v2+json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/schemaAbMissingUnused"
+                        }
+                    }
+                }
+            }
+        },
+        "responses": {
+            "responseA": {
+                "description": "responseA",
+                "headers": {
+                    "OB-Request-Id": {
+                        "schema": {
+                            "$ref": "#/components/schemas/schemaPlainMissingUnused"
+                        }
+                    }
+                }
+            }
+        },
+        "schemas": null
+    }
+}
+"""
+        parser = ArgParser()
+        args = parser.parse_args(['--json',test_yaml])
         sanitizer = Sanitizer(args)
 
         with self.assertRaises(InvalidYamlException):
@@ -257,7 +371,7 @@ components:
         type: string
 """
         parser = ArgParser()
-        args = parser.parse_args([test_yaml])
+        args = parser.parse_args(['--yaml',test_yaml])
         sanitizer = Sanitizer(args)
         with self.assertRaises(InvalidYamlException):
             sanitizer.sanitize(test_yaml)
@@ -275,6 +389,25 @@ components:
 
     def test_less_simple_file(self):
         file = "./tests/less_simple.yaml"
+        parser = ArgParser()
+        args = parser.parse_args([file])
+        sanitizer = Sanitizer(args)
+        with self.assertRaises(InvalidYamlException):
+            sanitizer.sanitize(file)
+        expected_unused = {'/components/schemas/schemaA',
+                           '/components/parameters/unusedParameter'}
+        self.assertSetEqual(set(list(sanitizer.analyzer.unused_components.keys())),
+                            expected_unused
+                            , "unused"
+                           )
+        expected_undefined = {'/components/responses/undefinedA'}
+        self.assertSetEqual(set(list(sanitizer.analyzer.undefined_components.keys())),
+                            expected_undefined
+                            , "expected_undefined"
+                           )
+
+    def test_less_simple_file_json(self):
+        file = "./tests/less_simple.json"
         parser = ArgParser()
         args = parser.parse_args([file])
         sanitizer = Sanitizer(args)

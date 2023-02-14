@@ -1,16 +1,16 @@
 # openapi-spec-sanitizer
 
-A Sanitizer for [OpenAPI](https://www.openapis.org/) Yaml spec files
+A Sanitizer for [OpenAPI](https://www.openapis.org/) YAML, or JSON, spec files
 
 ## Description
 
 Offers a CLI, or simple API, to detect, report, and, optionally, fix unused components in OpenAPI specifications
 
-* Detects unused, or undefined, components in Swagger (2.0) and OpenAPI (3.*) (soz: yaml-only) specifications
+* Detects unused, or undefined, components in Swagger (2.0) and OpenAPI (3.*) (YAML or json) specifications
 * It can _sanitize_ discovered unused components, either by:
     - deleting the component
     - or adding a new tag to the component
-* Sanitised yaml is stored to file
+* Sanitised YAML, or json, is stored to file
 * OpenAPI/Swagger Spec files can be loaded from URI or file
 * It always tries not to overwrite existing files(yay!)
 * It detects (unsupported so far) remote references and politely gives up
@@ -21,7 +21,7 @@ Hopefully it will find a more general use.
 
 ## TODO
 It doesn't do many things, but of note it might be useful to(most-likely first):
-- Add support for JSON-format Specification
+- ~~Add support for JSON-format Specification~~
 - Add support for remote references, which depends on:
 - Add support for multiple files
 - Add support for caching remote (url) specifications to file
@@ -54,13 +54,13 @@ options:
   -h, --help            show this help message and exit
   -o OUTPUT, --output OUTPUT
                         output file name for sanitized YAML
-  -l, --lax             Yaml syntax warnings are tolerable
+  -l, --lax             YAML, or JSON, syntax warnings are tolerable
   -v, --verbose
   -g, --debug
   --version             show the version number and exit
 
-Yaml Loading Options:
-  filename              OpenAPI specification: file path or url (yaml-only)
+YAML, or JSON, Loading Options:
+  filename              OpenAPI specification: file path or url (YAML, or JSON)
 
 Sanitizing Options:
   -s, --sanitize        Attempt to sanitize spec file (default False)
@@ -129,7 +129,7 @@ openapi_spec_sanitizer.exe tests/simple_unused.yaml -s
 
 ```cpp
 ...
-Main: dumping sanitized yaml to tests/simple_unused.san.yaml
+Main: dumping sanitized YAML to tests/simple_unused.san.yaml
 ------------------------ Analyzer Report ----------------
 Uunused components
   path: /components/requestBodies/requestBodyAUnused
@@ -137,7 +137,7 @@ Uunused components
 ----------------------- ~Analyzer Report ----------------
 ```
 
-Yields this sanitized yaml:  
+Yields this sanitized YAML:  
 **note** the unused component tagged with `unused`
 ```yaml
 openapi: 3.0.0

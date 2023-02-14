@@ -23,9 +23,9 @@ class ArgParser():
     def __init__(self):
         parser = argparse.ArgumentParser(description='Sanitize OpenAPI.')
         self.argParser = parser
-        load_group = parser.add_argument_group('Yaml Loading Options')
+        load_group = parser.add_argument_group('YAML, or JSON, Loading Options')
         load_group.add_argument('filename',
-                            help="openapi specification: file path or url (yaml-only) ")
+                            help="openapi specification: file path or url (YAML,or JSON) ")
         # TODO
         # load_group.add_argument("-c", "--cache", dest = 'cachedir',type=str,
         #                    help="cache remote files (loaded from from url) locally")
@@ -48,12 +48,22 @@ class ArgParser():
                             help="Sanitize mode is to remove component"
                             )
 
+        openapi_format_group = sanitizing_group.add_mutually_exclusive_group()
+        openapi_format_group.add_argument('-y', '--yaml',
+                            action='store_true',
+                            help="Default is YAML format"
+                            )  
+        openapi_format_group.add_argument('-j', '--json',
+                            action='store_true', 
+                            help="Default is JSON format"
+                            )
+
         parser.add_argument("-o", "--output", type=str,
-                            help="output file name for sanitized YAML")
+                            help="output file name for sanitized YAML, or JSON")
         parser.add_argument('-l', '--lax',
                             dest='warnings_are_ok',
                             action='store_true',
-                            help='Yaml syntax warnings are tolerable')
+                            help='YAML, or JSON, syntax warnings are tolerable')
         parser.add_argument('-g', '--debug',
                             action='store_true')
         parser.add_argument('-q', '--quiet',
