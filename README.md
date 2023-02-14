@@ -1,4 +1,4 @@
-# openapi_spec_sanitizer
+# openapi-spec-sanitizer
 
 A Sanitizer for [OpenAPI](https://www.openapis.org/) Yaml spec files
 
