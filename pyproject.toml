@@ -32,7 +32,8 @@ dynamic = ["version","readme"]
 test = [
   "pytest >=7",
   "pytest-cov[all]",
-  "Flask>=2,<3"
+  "Flask>=2,<3",
+  "oyaml>=1.0"
 ]
 
 [project.urls]
