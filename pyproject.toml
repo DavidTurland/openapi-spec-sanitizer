@@ -2,7 +2,8 @@
 requires = [
     "setuptools>=42",
     "wheel",
-    "pytest>=7"
+    "pytest>=7",
+    "oyaml>=1.0"
 ]
 build-backend = "setuptools.build_meta"
 
