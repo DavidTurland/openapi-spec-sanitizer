@@ -1,3 +1,4 @@
+![python_package](https://github.com/DavidTurland/openapi-spec-sanitizer/actions/workflows/python_package.yaml/badge.svg)
 # openapi-spec-sanitizer
 
 A Sanitizer for [OpenAPI](https://www.openapis.org/) YAML, or JSON, spec files
