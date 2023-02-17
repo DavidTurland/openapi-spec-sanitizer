@@ -38,9 +38,9 @@ pip install openapi-spec-sanitizer
 
 From source:
 ```bash
-python3 setup.py install 
+python3 -m pip install
 # or 
-python3 setup.py install --user
+python3 -m pip install --user
 ```
 
 ## Usage
@@ -178,7 +178,7 @@ components:
 ### Basic Testing
 
 ```bash
-python3 setup.py test
+pytest
 ```
 
 ### OpenBanking Specification Tests
@@ -189,7 +189,7 @@ And yes (as of 14/2/23) there are unused components...
 - These tests are not run as part of python setuptools 
 - Remote spec files are cached once and used locally
 ```bash
-python3 setup.py test -s tests.openbanking
+pytest tests/openbanking
 ```
 # Attributions
 [OpenAPI Initiative OpenAPI-Specification](https://github.com/OAI/OpenAPI-Specification) - A snapshot of one of their sample OpenAPI spec files,[api-with-examples.yaml](https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/examples/v3.0/api-with-examples.yaml), is stored in this repo, and 

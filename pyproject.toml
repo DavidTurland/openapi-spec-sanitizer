@@ -60,5 +60,5 @@ minversion = "7.0"
 pythonpath = [ "src" ]
 addopts = "-ra -q"
 testpaths = [
-    "tests"
+    "tests/default"
 ]
