@@ -1,0 +1,64 @@
+[build-system]
+requires = [
+    "setuptools>=42",
+    "wheel",
+    "pytest>=7",
+    "oyaml>=1.0"
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openapi-spec-sanitizer"
+description = "Sanitizes unused definitions from OpenAPI specification files(YAML and JSON)"
+requires-python = '>=3'
+license = {text = "Apache License Version 2.0"}
+authors = [
+    {name = "David Turland", email = "david@turland.org"}
+]
+keywords = ['openapi','sanitize']
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+]
+
+dynamic = ["version","readme"]
+
+[project.optional-dependencies]
+test = [
+  "pytest >=7",
+  "pytest-cov[all]",
+  "Flask>=2,<3",
+  "oyaml>=1.0"
+]
+
+[project.urls]
+Issues     = 'https://github.com/DavidTurland/openapi-spec-sanitizer/issues'
+Source     = 'https://github.com/DavidTurland/openapi-spec-sanitizer'
+
+
+# https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
+# [tool.setuptools]
+# packages = ["tolerant"]
+
+# avoids No `packages` or `py_modules` configuration, performing automatic discovery.
+[tool.setuptools.packages.find]
+where   = ["src"]       # list of folders that contain the packages (["."] by default)
+include = ["openapi_spec_sanitizer*"]  # package names should match these glob patterns (["*"] by default)
+
+[tool.setuptools.dynamic]
+version = {attr = "openapi_spec_sanitizer.__version__"}
+readme = {file = "README.md", content-type = "text/markdown"}
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+# thanks https://stackoverflow.com/questions/50155464/using-pytest-with-a-src-layer
+pythonpath = [ "src" ]
+addopts = "-ra -q"
+testpaths = [
+    "tests"
+]

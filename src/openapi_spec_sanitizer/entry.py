@@ -15,46 +15,49 @@
 # limitations under the License.
 ########################################################################
 
-__all__=["Entry"]
+__all__ = ["Entry"]
+
 
 class Entry:
-    def __init__(self, tipe,node_path,line = None):
-        self.tipe = tipe;
-        self.node_path = node_path;
+    def __init__(self, tipe, node_path, line=None):
+        self.tipe = tipe
+        self.node_path = node_path
         self.line = line
-        # self.ref = None
         self.ref_path = None
-        self.referrers = {}   # node_path : Entry
-        self.component = None # the component this Entry is under
+        self.referrers = {}    # node_path : Entry
+        self.component = None  # the component this Entry is under
         self.declared = False
         self.required = None
 
     def __repr__(self):
-        return(f"Type: {self.tipe}, path: {self.node_path}, line: {self.line}, is component? {self.is_component()}, is declared? {self.declared}, is required? {self.required}")
+        return (f"Type: {self.tipe}, " +
+                f"path: {self.node_path}, " +
+                f"line: {self.line}, is component? {self.is_component()}, " +
+                f"is declared? {self.declared}, is required? {self.required}")
 
     def is_declared(self):
         return self.declared
 
-    def set_ref_path(self,ref_path):
+    def set_ref_path(self, ref_path):
         self.ref_path = ref_path
-    
-    def declare(self,line):
+
+    def declare(self, line):
         self.line = line
         self.declared = True
 
-    def set_component(self,component):
+    def set_component(self, component):
         self.component = component
 
     def is_part_of_component(self):
         return self.component is not None
-        
+
     def is_component(self):
         return self.tipe == 'Component'
-        
-    def add_referrer(self,node_path,node):
+
+    def add_referrer(self, node_path, node):
         self.referrers[node_path] = node
-        
-    def is_required(self, cache = set()):
+
+    def is_required(self, cache=set()):
         if self.required is not None:
             return self.required
         if self.is_component():

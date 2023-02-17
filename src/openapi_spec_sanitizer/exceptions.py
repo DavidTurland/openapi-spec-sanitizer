@@ -15,31 +15,38 @@
 # limitations under the License.
 ########################################################################
 
-__all__ = ['InvalidYamlException', 
+__all__ = ['InvalidYamlException',
            'DirtyYamlWarning',
            'UnsupportedYamlException',
            'InvalidFileException',
            'Warning',
-           'Unrecoverable']
+           'Unrecoverable'
+           ]
+
 
 class Warning(Exception):
     pass
 
+
 class Unrecoverable(Exception):
     pass
 
+
 class InvalidYamlException(Unrecoverable):
-   def __init__(self,msg):
-      super().__init__("InvalidYamlException: " + msg)
+    def __init__(self, msg):
+        super().__init__("InvalidYamlException: " + msg)
+
 
 class DirtyYamlWarning(Warning):
-   def __init__(self,msg):
-      super().__init__("DirtyYamlWarning: " + msg)
+    def __init__(self, msg):
+        super().__init__("DirtyYamlWarning: " + msg)
+
 
 class UnsupportedYamlException(Unrecoverable):
-   def __init__(self,msg):
-      super().__init__("UnsupportedYamlException: " + msg)
+    def __init__(self, msg):
+        super().__init__("UnsupportedYamlException: " + msg)
+
 
 class InvalidFileException(Unrecoverable):
-   def __init__(self,msg=''):
-      super().__init__("InvalidFileException: " + msg)      
+    def __init__(self, msg=''):
+        super().__init__("InvalidFileException: " + msg)

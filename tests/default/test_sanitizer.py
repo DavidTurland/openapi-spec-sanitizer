@@ -16,11 +16,10 @@
 ########################################################################
 import oyaml as yaml
 import unittest
-import pprint
-import sys
-from openapi_spec_sanitizer.sanitizer  import Sanitizer
-from openapi_spec_sanitizer.exceptions import DirtyYamlWarning,InvalidYamlException,UnsupportedYamlException
-from openapi_spec_sanitizer.ArgParser  import ArgParser
+from openapi_spec_sanitizer.sanitizer import Sanitizer
+from openapi_spec_sanitizer.exceptions import InvalidYamlException, UnsupportedYamlException
+from openapi_spec_sanitizer.argparser import ArgParser
+
 
 class TestSanitizer(unittest.TestCase):
 
@@ -28,11 +27,11 @@ class TestSanitizer(unittest.TestCase):
         """
           snapshot (14/2/23) cached locally so tests can run locally
         """
-        src_url='https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/examples/v3.0/api-with-examples.yaml'
+        # src_url = 'https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/examples/v3.0/api-with-examples.yaml'
         file = "./tests/api-with-examples.yaml"
         # but can make it dynamic:
         # import urllib.request
-        # urllib.request.urlretrieve(src_url,file)
+        # urllib.request.urlretrieve(src_url, file)
         parser = ArgParser()
         args = parser.parse_args([file])
         sanitizer = Sanitizer(args)
@@ -61,7 +60,7 @@ components:
   schemas:
 """
         parser = ArgParser()
-        args = parser.parse_args(['--yaml',test_yaml])
+        args = parser.parse_args(['--yaml', test_yaml])
         sanitizer = Sanitizer(args)
 
         with self.assertRaises(UnsupportedYamlException):
@@ -104,7 +103,7 @@ components:
 }
 """
         parser = ArgParser()
-        args = parser.parse_args(['--json',test_yaml])
+        args = parser.parse_args(['--json', test_yaml])
         sanitizer = Sanitizer(args)
 
         with self.assertRaises(UnsupportedYamlException):
@@ -117,7 +116,7 @@ components:
         bogus_yamls = ["unbalanced blackets: ]["]
         parser = ArgParser()
         for bogus_yaml in bogus_yamls:
-            args = parser.parse_args(['--yaml',bogus_yaml])
+            args = parser.parse_args(['--yaml', bogus_yaml])
             sanitizer = Sanitizer(args)
 
             with self.assertRaises(yaml.parser.ParserError):
@@ -126,18 +125,18 @@ components:
     def test_openapi_versions(self):
 
         versions = [
-             ('openapi','3.0.0',   True,None),
-             ('openapi','.3.0.0',  False, InvalidYamlException),
-             ('openapi','wibble',  False, InvalidYamlException),
-             ('openapi','4.0.0',   False, InvalidYamlException),
-             ('swagger','2.0',     False, InvalidYamlException),
-             ('swagger','1.9',     False, InvalidYamlException),
-             ('swagger','3.0',     False, InvalidYamlException),
-             ('swagger','wibble',  False, InvalidYamlException),
-             ('flooby' ,'dooby',   False, InvalidYamlException)
-           ]
+                     ('openapi', '3.0.0',   True, None),
+                     ('openapi', '.3.0.0',  False, InvalidYamlException),
+                     ('openapi', 'wibble',  False, InvalidYamlException),
+                     ('openapi', '4.0.0',   False, InvalidYamlException),
+                     ('swagger', '2.0',     False, InvalidYamlException),
+                     ('swagger', '1.9',     False, InvalidYamlException),
+                     ('swagger', '3.0',     False, InvalidYamlException),
+                     ('swagger', 'wibble',  False, InvalidYamlException),
+                     ('flooby', 'dooby',   False, InvalidYamlException)
+                    ]
 
-        for brand,version,ok,exception in versions:
+        for brand, version, ok, exception in versions:
             test_yaml = """
 {brand}: {version}
 paths:
@@ -158,14 +157,14 @@ components:
             type: string
   responses:
   schemas:
-""".format(version = version, brand = brand)
+""".format(version=version, brand=brand)
             parser = ArgParser()
-            args = parser.parse_args(['--yaml',test_yaml])
+            args = parser.parse_args(['--yaml', test_yaml])
             sanitizer = Sanitizer(args)
             if ok:
                 sanitizer.sanitize(test_yaml)
             else:
-                with self.assertRaises(exception, msg = "THis doesnty work"):
+                with self.assertRaises(exception, msg="THis doesnty work"):
                     sanitizer.sanitize(test_yaml)
 
     def test_simple(self):
@@ -200,7 +199,7 @@ components:
   schemas:
 """
         parser = ArgParser()
-        args = parser.parse_args(['--yaml',test_yaml])
+        args = parser.parse_args(['--yaml', test_yaml])
         sanitizer = Sanitizer(args)
 
         with self.assertRaises(InvalidYamlException):
@@ -208,16 +207,16 @@ components:
 
         expected_unused = {'/components/requestBodies/requestBodyAUnused'}
         self.assertSetEqual(set(list(sanitizer.analyzer.unused_components.keys())),
-                            expected_unused
-                            , "expected_unused"
-                           )
+                            expected_unused,
+                            "expected_unused"
+                            )
         expected_undefined = {'/components/requestBodies/requestBodyMissingRequired',
                               '/components/schemas/schemaPlainMissingUnused'
-                             }
+                              }
         self.assertSetEqual(set(list(sanitizer.analyzer.get_undefined_components().keys())),
-                            expected_undefined
-                            , "expected_undefined"
-                           )
+                            expected_undefined,
+                            "expected_undefined"
+                            )
 
     def test_simple_json(self):
         test_yaml = """
@@ -270,7 +269,7 @@ components:
 }
 """
         parser = ArgParser()
-        args = parser.parse_args(['--json',test_yaml])
+        args = parser.parse_args(['--json', test_yaml])
         sanitizer = Sanitizer(args)
 
         with self.assertRaises(InvalidYamlException):
@@ -278,16 +277,16 @@ components:
 
         expected_unused = {'/components/requestBodies/requestBodyAUnused'}
         self.assertSetEqual(set(list(sanitizer.analyzer.unused_components.keys())),
-                            expected_unused
-                            , "expected_unused"
-                           )
+                            expected_unused,
+                            "expected_unused"
+                            )
         expected_undefined = {'/components/requestBodies/requestBodyMissingRequired',
                               '/components/schemas/schemaPlainMissingUnused'
-                             }
+                              }
         self.assertSetEqual(set(list(sanitizer.analyzer.get_undefined_components().keys())),
-                            expected_undefined
-                            , "expected_undefined"
-                           )
+                            expected_undefined,
+                            "expected_undefined"
+                            )
 
     def test_less_simple(self):
         test_yaml = """
@@ -371,21 +370,22 @@ components:
         type: string
 """
         parser = ArgParser()
-        args = parser.parse_args(['--yaml',test_yaml])
+        args = parser.parse_args(['--yaml', test_yaml])
         sanitizer = Sanitizer(args)
         with self.assertRaises(InvalidYamlException):
             sanitizer.sanitize(test_yaml)
         expected_unused = {'/components/schemas/schemaA',
-                           '/components/parameters/unusedParameter'}
+                           '/components/parameters/unusedParameter'
+                           }
         self.assertSetEqual(set(list(sanitizer.analyzer.unused_components.keys())),
-                            expected_unused
-                            , "unused"
-                           )
+                            expected_unused,
+                            "unused"
+                            )
         expected_undefined = {'/components/responses/undefinedA'}
         self.assertSetEqual(set(list(sanitizer.analyzer.undefined_components.keys())),
-                            expected_undefined
-                            , "expected_undefined"
-                           )
+                            expected_undefined,
+                            "expected_undefined"
+                            )
 
     def test_less_simple_file(self):
         file = "./tests/less_simple.yaml"
@@ -395,16 +395,17 @@ components:
         with self.assertRaises(InvalidYamlException):
             sanitizer.sanitize(file)
         expected_unused = {'/components/schemas/schemaA',
-                           '/components/parameters/unusedParameter'}
+                           '/components/parameters/unusedParameter'
+                           }
         self.assertSetEqual(set(list(sanitizer.analyzer.unused_components.keys())),
-                            expected_unused
-                            , "unused"
-                           )
+                            expected_unused,
+                            "unused"
+                            )
         expected_undefined = {'/components/responses/undefinedA'}
         self.assertSetEqual(set(list(sanitizer.analyzer.undefined_components.keys())),
-                            expected_undefined
-                            , "expected_undefined"
-                           )
+                            expected_undefined,
+                            "expected_undefined"
+                            )
 
     def test_less_simple_file_json(self):
         file = "./tests/less_simple.json"
@@ -414,13 +415,14 @@ components:
         with self.assertRaises(InvalidYamlException):
             sanitizer.sanitize(file)
         expected_unused = {'/components/schemas/schemaA',
-                           '/components/parameters/unusedParameter'}
+                           '/components/parameters/unusedParameter'
+                           }
         self.assertSetEqual(set(list(sanitizer.analyzer.unused_components.keys())),
-                            expected_unused
-                            , "unused"
-                           )
+                            expected_unused,
+                            "unused"
+                            )
         expected_undefined = {'/components/responses/undefinedA'}
         self.assertSetEqual(set(list(sanitizer.analyzer.undefined_components.keys())),
-                            expected_undefined
-                            , "expected_undefined"
-                           )
+                            expected_undefined,
+                            "expected_undefined"
+                            )
