@@ -16,11 +16,11 @@
 ########################################################################
 
 import logging
-import sys
 
 from .sanitizer import Sanitizer
-from .exceptions import DirtyYamlWarning,InvalidYamlException,Warning,Unrecoverable
-from .ArgParser import ArgParser
+from .exceptions import DirtyYamlWarning, Unrecoverable
+from .argparser import ArgParser
+
 
 def main():
     parser = ArgParser()
@@ -40,7 +40,7 @@ def main():
     logger.info(f"filename   : {args.filename}")
     logger.info(f"sanitizing : {args.sanitize}")
     sanitizer = Sanitizer(args)
-    epitaph =  ''
+    epitaph = ''
     try:
         sanitizer.sanitize(args.filename)
         sanitizer.dump("test.yaml")
@@ -52,6 +52,7 @@ def main():
         print(f"Main: Unrecoverable error with {e}")
     logger.info(sanitizer.report())
     logger.info(f"finished{epitaph}")
+
 
 if __name__ == '__main__':
     main()

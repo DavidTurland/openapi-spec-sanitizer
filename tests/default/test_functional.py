@@ -14,19 +14,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ########################################################################
-import oyaml as yaml
 import unittest
-import pprint
-import sys
 import re
+
 
 class TestFunctional(unittest.TestCase):
     def test_url_parsing(self):
-        regex = re.compile(r'^(?:http|ftp)s?://.*/(?P<filename>(?P<root>.*)(?P<ext>\.\w*))$',re.IGNORECASE)
-        urls = [('https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/examples/v3.0/api-with-examples.yaml','api-with-examples', '.yaml','api-with-examples.yaml')]
-        for url,root,ext,filename in urls:
+        regex = re.compile(r'^(?:http|ftp)s?://.*/(?P<filename>(?P<root>.*)(?P<ext>\.\w*))$', re.IGNORECASE)
+        urls = [('https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/examples/v3.0/api-with-examples.yaml',
+                 'api-with-examples',
+                 '.yaml',
+                 'api-with-examples.yaml')
+                ]
+        for url, root, ext, filename in urls:
             m = re.match(regex, url)
             self.assertIsNotNone(m)
-            self.assertEqual(m.group('root'),root)
-            self.assertEqual(m.group('ext'),ext)
-            self.assertEqual(m.group('filename'),filename)
+            self.assertEqual(m.group('root'), root)
+            self.assertEqual(m.group('ext'), ext)
+            self.assertEqual(m.group('filename'), filename)

@@ -17,36 +17,35 @@
 
 __all__ = ['Loader']
 
-import re
 import oyaml as yaml
 import json
 import os
-import urllib.request
 from pathlib import Path
-from enum import Enum
 
 from .exceptions import InvalidFileException
-from .loader import Loader,OpenapiFormat
+from .loader import Loader, OpenapiFormat
+
 
 class Dumper:
-    def __init__(self, loader,args):
+    def __init__(self, loader, args):
         self.loader = loader
-    def dump(self,filename):
-        filename        = self.output_filename
+
+    def dump(self, filename):
+        filename = self.output_filename
         loader_filename = self.loader.get_filename()
         if filename is None:
-            if loader_filename is None: 
+            if loader_filename is None:
                 raise InvalidFileException()
             root, ext = os.path.splitext(loader_filename)
             filename = f"{root}.san{ext}"
         elif loader_filename is not None:
-            if(loader_filename == filename):
+            if loader_filename == filename:
                 raise InvalidFileException(f"will not overwrite original file {filename}")
         if Path(filename).exists():
             raise InvalidFileException(f"will not overwrite existing file {filename}")
 
-        with open(filename, 'w',encoding='utf-8') as file:
-            if OpenapiFormat.YAML == loader.get_openapi_format():
-                yaml.dump(self.orig_yaml, file,width=1000)
-            elif OpenapiFormat.JSON == loader.get_openapi_format():              
+        with open(filename, 'w', encoding='utf-8') as file:
+            if OpenapiFormat.YAML == self.loader.get_openapi_format():
+                yaml.dump(self.orig_yaml, file, width=1000)
+            elif OpenapiFormat.JSON == self.loader.get_openapi_format():
                 json.dump(self.orig_yaml, file, ensure_ascii=False, indent=4)

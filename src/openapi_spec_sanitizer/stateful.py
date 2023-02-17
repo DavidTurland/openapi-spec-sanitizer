@@ -15,14 +15,19 @@
 # limitations under the License.
 ########################################################################
 __all__ = ['Stateful']
+
+
 class Stateful:
-    def __init__(self,state):
+    def __init__(self, state):
         self._state = state
-    def needs(self,state,msg):
-        if(state.value != self._state.value):
+
+    def needs(self, state, msg):
+        if (state.value != self._state.value):
             print(f"Invalid state needs to be {state} {state.value} but in {self._state}{self._state.value},  {msg}")
-    def at_least(self,state,msg):
-        if(state.value > self._state.value):
+
+    def at_least(self, state, msg):
+        if (state.value > self._state.value):
             print(f"Invalid state needs to be at least {state} {state.value} but in {self._state}{self._state.value},  {msg}")
-    def get_state():
+
+    def get_state(self):
         return self._state

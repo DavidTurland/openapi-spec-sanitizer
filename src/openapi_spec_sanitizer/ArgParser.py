@@ -19,44 +19,45 @@ import argparse
 
 from . import __version__
 
+
 class ArgParser():
     def __init__(self):
         parser = argparse.ArgumentParser(description='Sanitize OpenAPI.')
         self.argParser = parser
         load_group = parser.add_argument_group('YAML, or JSON, Loading Options')
         load_group.add_argument('filename',
-                            help="openapi specification: file path or url (YAML,or JSON) ")
+                                help="openapi specification: file path or url (YAML, or JSON) ")
         # TODO
-        # load_group.add_argument("-c", "--cache", dest = 'cachedir',type=str,
+        # load_group.add_argument("-c", "--cache", dest = 'cachedir', type=str,
         #                    help="cache remote files (loaded from from url) locally")
 
         sanitizing_group = parser.add_argument_group('Sanitizing Options')
         sanitizing_group.add_argument('-s', '--sanitize',
-                            action='store_true',
-                            help="Attempt to sanitize spec file (default False) "
-                            )
+                                      action='store_true',
+                                      help="Attempt to sanitize spec file (default False) "
+                                      )
 
         mod_group = sanitizing_group.add_mutually_exclusive_group()
         mod_group.add_argument('-t', '--tag',
-                            type=str,
-                            default = "unused",
-                            help="sanitize mode is to tag component"
-                            )  
+                               type=str,
+                               default="unused",
+                               help="sanitize mode is to tag component"
+                               )
         mod_group.add_argument('-r', '--remove',
-                            dest='delete',
-                            action='store_true', 
-                            help="Sanitize mode is to remove component"
-                            )
+                               dest='delete',
+                               action='store_true',
+                               help="Sanitize mode is to remove component"
+                               )
 
         openapi_format_group = sanitizing_group.add_mutually_exclusive_group()
         openapi_format_group.add_argument('-y', '--yaml',
-                            action='store_true',
-                            help="Default is YAML format"
-                            )  
+                                          action='store_true',
+                                          help="Default is YAML format"
+                                          )
         openapi_format_group.add_argument('-j', '--json',
-                            action='store_true', 
-                            help="Default is JSON format"
-                            )
+                                          action='store_true',
+                                          help="Default is JSON format"
+                                          )
 
         parser.add_argument("-o", "--output", type=str,
                             help="output file name for sanitized YAML, or JSON")
@@ -73,4 +74,4 @@ class ArgParser():
                             help='show the version number and exit')
 
     def parse_args(self, args=None, namespace=None):
-        return self.argParser.parse_args(args,namespace)
+        return self.argParser.parse_args(args, namespace)
